@@ -77,23 +77,39 @@ describe('Testes da Funcionalidade Usuários', () => {
      });
 
      it('Deve editar um usuário previamente cadastrado', () => {
-          //TODO: 
+          // Primeiro, cria um usuário
           cy.request({
                method: 'POST',
                url: 'usuarios',
                headers: { authorization: token },
                body: {
                     "nome": 'Hideo Kojima',
-                    "email": 'hideo@kojima.com.br',
+                    "email": `hideo${Math.floor(Math.random() * 10000)}@kojima.com.br`, // Evita e-mails duplicados
                     "password": "teste",
                     "administrador": "true"
-               },
-               failOnStatusCode: false
-          }).then((response) =>{
-               expect(response.status).to.equal(400)
-               expect(response.body.message).to.equal('Este email já está sendo usado')
+               }
+          }).then((response) => {
+               expect(response.status).to.equal(201)
+               let userId = response.body._id  // Pega o ID do usuário criado
+     
+               // Agora edita esse usuário
+               cy.request({
+                    method: 'PUT',
+                    url: `usuarios/${userId}`,
+                    headers: { authorization: token },
+                    body: {
+                         "nome": 'Hideo Kojima Editado',
+                         "email": `kojima${Math.floor(Math.random() * 10000)}@editado.com`,
+                         "password": "teste",
+                         "administrador": "false"
+                    }
+               }).then((editResponse) => {
+                    expect(editResponse.status).to.equal(200)
+                    expect(editResponse.body.message).to.equal('Registro alterado com sucesso')
+               })
           })
-     });
+     })
+     
 
      it('Deve deletar um usuário previamente cadastrado', () => {
           //TODO: 
